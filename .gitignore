@@ -1,0 +1,26 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Dataset
+dataset/
+*.tsv
+*.csv
+*.zip
+
+# ML models
+model/*.pkl
+model/*.joblib
+model/*.json
+
+# Generated output
+output/*.tsv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
