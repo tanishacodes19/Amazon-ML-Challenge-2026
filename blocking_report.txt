@@ -1,0 +1,263 @@
+Amazon ML Challenge 2026 - Blocking & Candidate Generation Report
+
+Team Role:
+Member 1 - Data Preparation, Blocking, and Candidate Generation
+
+============================================================
+1. DATASET SUMMARY
+============================================================
+
+Test Source 1:
+1,732,544 rows
+
+Test Source 2:
+4,887,273 rows
+
+Test Source 3:
+5,082,316 rows
+
+Total candidate/reference records from Source 2 + Source 3:
+9,969,589 rows
+
+Training ground-truth rows:
+2,206,821 Source 1 rows
+
+Expanded ground-truth true pairs:
+7,761,612 true S1-to-S2/S3 pairs
+
+
+============================================================
+2. NORMALIZATION
+============================================================
+
+The following normalization was applied to business names and
+addresses:
+
+- Missing/null values converted to empty strings.
+- Text converted to lowercase.
+- Ampersand (&) converted to "and".
+- Punctuation and non-letter/non-number separators normalized
+  to spaces.
+- Unicode letters, numbers, and combining marks preserved.
+- Repeated whitespace collapsed.
+- Leading/trailing whitespace removed.
+
+This normalization was applied consistently to Source 1,
+Source 2, and Source 3.
+
+
+============================================================
+3. BLOCKING STRATEGY
+============================================================
+
+Candidate generation was performed using multiple complementary
+blocking rules.
+
+The following blocks were used:
+
+1. Exact normalized business name
+
+2. House number + business-name prefix
+
+3. Rare first-name token
+   Frequency threshold: <= 25
+
+4. Rare address prefix
+   Prefix length: 12 characters
+   Frequency threshold: <= 5
+
+5. Rare address suffix
+   Suffix length: 12 characters
+   Frequency threshold: <= 5
+
+6. Rare second-name token
+   Frequency threshold: <= 25
+
+7. Rare exact normalized address
+   Frequency threshold: <= 10
+
+8. Rare last-name token
+   Frequency threshold: <= 25
+
+9. Informative business-name token
+   Generic corporate/location terms removed before blocking
+   Frequency threshold: <= 25
+
+
+============================================================
+4. BLOCK CONTRIBUTIONS
+============================================================
+
+The blocks were evaluated against the expanded training
+ground truth.
+
+Initial exact normalized-name block:
+Recovered true pairs: 1,658,359
+
+House number + name prefix:
+Recovered true pairs: 2,047,180
+
+Rare first-name token:
+Recovered true pairs: 454,767
+
+Rare address prefix:
+Recovered true pairs: 2,389,067
+
+Rare address suffix:
+Recovered true pairs: 48,546
+
+Rare second-name token:
+Recovered true pairs: 153,568
+
+Rare exact address (frequency <= 10):
+Recovered true pairs: 630,555
+
+Rare last-name token (frequency <= 25):
+Recovered true pairs: 43,939
+
+Informative name token (frequency <= 25):
+Recovered true pairs: 453,992
+
+Because blocks overlap, these values are not added directly.
+The final recall was calculated using the unique union of all
+recovered true pairs.
+
+
+============================================================
+5. FINAL TRAINING RECALL
+============================================================
+
+Expanded ground-truth pairs:
+7,761,612
+
+Unique true pairs recovered by the final working baseline:
+4,427,628
+
+Verified candidate recall:
+57.0452%
+
+Remaining missed true pairs:
+3,333,984
+
+
+============================================================
+6. FINAL CANDIDATE GENERATION
+============================================================
+
+The final candidate generator processes the blocks sequentially
+and stores candidate IDs in sets to prevent duplicate candidate
+IDs.
+
+Final cumulative candidate-generation results:
+
+Exact normalized name:
+10,868,494 candidate pairs
+
+House number + name prefix:
+10,234,766 candidate pairs
+
+Rare first-name token:
+2,013,842 candidate pairs
+
+Rare address prefix:
+2,114,805 candidate pairs
+
+Rare address suffix:
+239,939 candidate pairs
+
+Rare second-name token:
+748,785 candidate pairs
+
+Rare exact address:
+612,121 candidate pairs
+
+Rare last-name token:
+309,961 candidate pairs
+
+Informative name token:
+2,011,335 candidate pairs
+
+
+============================================================
+7. FINAL OUTPUT VALIDATION
+============================================================
+
+Output file:
+candidate_pairs.tsv
+
+Expected Source 1 rows:
+1,732,544
+
+Actual output rows:
+1,732,544
+
+Validation results:
+
+- Exactly one output row per Source 1 entity: PASS
+- No duplicate Source 1 entity IDs: PASS
+- No duplicate candidate IDs within a row: PASS
+- All candidate IDs belong to Source 2 or Source 3: PASS
+- Empty candidate lists are allowed and preserved: PASS
+- Candidate IDs are comma-separated: PASS
+- Output header matches required format: PASS
+
+
+============================================================
+8. OUTPUT FORMAT
+============================================================
+
+The final file contains exactly two columns:
+
+source1_entity_id
+candidate_entity_ids
+
+Each Source 1 entity appears exactly once.
+
+candidate_entity_ids contains comma-separated Source 2 and
+Source 3 entity IDs.
+
+If no candidates are found, the candidate_entity_ids field is
+empty.
+
+
+============================================================
+9. OPEN-SET COUNTRY HANDLING
+============================================================
+
+Country was not hard-coded to only the training countries.
+
+The candidate-generation pipeline uses the normalized dataset
+and does not restrict candidate generation to a fixed country
+list, allowing unseen test countries such as France to be
+represented.
+
+
+============================================================
+10. FILES PRODUCED
+============================================================
+
+01_data_analysis.py
+02_normalization.py
+03_blocking.py
+04_candidate_generation.py
+candidate_pairs.tsv
+blocking_report.txt
+
+
+============================================================
+11. NOTES
+============================================================
+
+The blocking pipeline was designed to be memory-conscious for
+execution on a machine with limited RAM.
+
+Global token explosion was avoided because it creates very large
+intermediate structures.
+
+Candidate IDs are accumulated using sets so that overlapping
+blocking rules do not create duplicate candidate IDs.
+
+The final candidate file is intended to provide the downstream
+matching model with a high-recall candidate set. Candidate recall
+is therefore treated as an upper bound for downstream matching
+recall.
