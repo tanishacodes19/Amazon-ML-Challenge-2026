@@ -1,26 +1,45 @@
-# Python virtual environment
+# Python virtual environment & cache
 .venv/
-
-# Python cache
+env/
+venv/
 __pycache__/
 *.py[cod]
+*$py.class
+*.ipynb_checkpoints/
 
-# Dataset
+# Temporary databases and large caches
+duckdb_tmp/
+duckdb_temp/
+containment_tmp/
+*.duckdb*
+*.tmp
+
+# Datasets and large tabular data
 dataset/
+normalized_data/
+training_data/
+training_candidate_blocks/
+validation_benchmark/
+scratch/
+output/
+test_validator_check/
+final_package_build/
+
+# Ignore large data formats
 *.tsv
 *.csv
+*.parquet
+*.npy
 *.zip
 
-# ML models
-model/*.pkl
-model/*.joblib
-model/*.json
+# Exceptions for documentation or small sample files
+!sample_candidate_pairs.tsv
 
-# Generated output
-output/*.tsv
+# Models: Ignore intermediate arrays, allow model config/checkpoints if < 50MB
+model/*.npy
+model/train_*
 
-# Jupyter
-.ipynb_checkpoints/
-
-# Environment variables
+# OS metadata
+.DS_Store
+Thumbs.db
 .env
